@@ -16,6 +16,14 @@
 			</picker>
 		</view>
 
+
+		<view class="form-item">
+			<text class="label">出生时间：</text>
+			<picker mode="time" :value="userInfo.birthTime" @change="selectBirthTime">
+				<view class="picker-text">{{ userInfo.birthTime || '请选择' }}</view>
+			</picker>
+		</view>
+
 		<!-- 省市区选择 -->
 		<view class="form-item">
 			<text class="label">地址：</text>
@@ -48,7 +56,7 @@
 				cityList: [], // 市列表
 				districtList: [], // 区列表
 				cityData: chinaData,
-				mainURI: "http://114.132.238.217:8000/api/fortune/"
+				mainURI: "/api/fortune/"
 			};
 		},
 		created() {
@@ -68,6 +76,10 @@
 			// 选择生日
 			selectBirthday(e) {
 				this.userInfo.birthday = e.detail.value;
+			},
+			// 选择出生时间
+			selectBirthTime(e) {
+				this.userInfo.birthTime = e.detail.value;
 			},
 			// 选择省市区
 			selectRegion(e) {
@@ -95,82 +107,79 @@
 					});
 					return;
 				}
-				console.log("用户信息:", this.userInfo);
+				this.getResult()
 				uni.showToast({
 					title: '提交成功',
 					icon: 'success'
 				});
 			},
-		
+
 			// 请求账单信息
 			getBill() {
 				uni.request({
-				  url: this.mainURI + 'key/', // 接口地址
-				  method: 'POST', // 请求方法，GET 或 POST
-				  data: {
-				    fortune_key: "test"
-				  },
-				  header: {
-				    'content-type': 'application/json' // 请求头
-				  },
-				  success: (res) => {
-				    // 请求成功时的回调
-				    if (res.statusCode === 200) {
-				      console.log('请求成功', res.data); // res.data 包含服务器返回的数据
-				      // 你可以在这里处理返回的数据，例如更新页面的状态
-				    } else {
-				      console.log('接口请求失败', res);
-				    }
-				  },
-				  fail: (err) => {
-				    // 请求失败时的回调
-				    console.log('请求失败', err);
-				    uni.showToast({
-				      title: '请求失败，请稍后再试',
-				      icon: 'none'
-				    });
-				  },
-				  complete: () => {
-				    // 请求完成时的回调（无论成功或失败都会执行）
-				    console.log('请求完成');
-				  }
+					url: this.mainURI + 'key/', // 接口地址
+					method: 'POST', // 请求方法，GET 或 POST
+					data: {
+						fortune_key: "test"
+					},
+					header: {
+						'content-type': 'application/json' // 请求头
+					},
+					success: (res) => {
+						console.log('请求成功', res.fortune);
+					},
+					fail: (err) => {
+						// 请求失败时的回调
+						console.log('请求失败', err);
+						uni.showToast({
+							title: '请求失败，请稍后再试',
+							icon: 'none'
+						});
+					},
+					complete: () => {
+						// 请求完成时的回调（无论成功或失败都会执行）
+						console.log('请求完成');
+					}
 				});
 
 			},
-			
+
 			// 请求测试结果
 			getResult() {
+				// 组合日期和时间
+				const birthDateTime = `${this.userInfo.birthday} ${this.userInfo.birthTime}:00`;
 				uni.request({
-				  url: this.mainURI, // 接口地址
-				  method: 'POST', // 请求方法，GET 或 POST
-				  data: {
-				    gender: this.userInfo.gender === "男" ? "M" : "F",
-					birth_time: ""
-				  },
-				  header: {
-				    'content-type': 'application/json' // 请求头
-				  },
-				  success: (res) => {
-				    // 请求成功时的回调
-				    if (res.statusCode === 200) {
-				      console.log('请求成功', res.data); // res.data 包含服务器返回的数据
-				      // 你可以在这里处理返回的数据，例如更新页面的状态
-				    } else {
-				      console.log('接口请求失败', res);
-				    }
-				  },
-				  fail: (err) => {
-				    // 请求失败时的回调
-				    console.log('请求失败', err);
-				    uni.showToast({
-				      title: '请求失败，请稍后再试',
-				      icon: 'none'
-				    });
-				  },
-				  complete: () => {
-				    // 请求完成时的回调（无论成功或失败都会执行）
-				    console.log('请求完成');
-				  }
+					url: this.mainURI, // 接口地址
+					method: 'POST', // 请求方法，GET 或 POST
+					data: {
+						gender: this.userInfo.gender,
+						birth_time: birthDateTime,
+						birth_place: `中国${this.userInfo.region.join("")}`
+					},
+					header: {
+						'content-type': 'application/json' // 请求头
+					},
+					success: (res) => {
+						// 请求成功时的回调
+						if (res.statusCode === 200) {
+							console.log('请求成功', res.data); // res.data 包含服务器返回的数据
+							// 你可以在这里处理返回的数据，例如更新页面的状态
+						} else {
+							console.log('接口请求失败', res);
+						}
+					},
+					fail: (err) => {
+						// 请求失败时的回调
+						console.log('请求失败', err);
+						uni.showToast({
+							title: '请求失败，请稍后再试',
+							icon: 'none'
+						});
+					},
+					complete: () => {
+						// 请求完成时的回调（无论成功或失败都会执行）
+						console.log('请求完成');
+					}
 				});
 
 			}
@@ -190,7 +199,7 @@
 	}
 
 	.label {
-		width: 150rpx;
+		width: 200rpx;
 		font-size: 32rpx;
 	}
 

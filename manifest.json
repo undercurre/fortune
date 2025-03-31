@@ -68,5 +68,19 @@
     "uniStatistics" : {
         "enable" : false
     },
+	"h5" : {
+	    "devServer" : {
+	        "disableHostCheck" : true,
+	        "proxy" : {
+	            "/fapi" : {
+	                "target" : "http://114.132.238.217:8000",
+	                "changeOrigin" : true,
+	                "pathRewrite" : {
+	                    "^/fapi" : ""
+	                }
+	            }
+	        }
+	    }
+	},
     "vueVersion" : "3"
 }
